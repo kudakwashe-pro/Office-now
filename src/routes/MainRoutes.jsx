@@ -13,6 +13,7 @@ const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/index')));
 const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 const ItemsPage = Loadable(lazy(() => import('pages/Items/index')));
 const CustomerPage = Loadable(lazy(() => import('pages/client/index')));
+const InvoicePage = Loadable(lazy(() => import('pages/invoice/index')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -56,6 +57,10 @@ const MainRoutes = {
         {
             path: 'clients',
             element: <CustomerPage />
+        },
+        {
+            path: 'invoices',
+            element: <InvoicePage />
         }
     ]
 };

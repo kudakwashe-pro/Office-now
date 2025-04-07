@@ -5,18 +5,19 @@ import router from 'routes';
 import ThemeCustomization from 'themes';
 
 import ScrollTop from 'components/ScrollTop';
-import { DateProvider } from 'contexts/dateContext';
+import { DataProvider } from 'contexts/DataProvider';
+import 'assets/cdn.css';
 
 // ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
 
 export default function App() {
     return (
         <ThemeCustomization>
-            <DateProvider>
+            <DataProvider>
                 <ScrollTop>
                     <RouterProvider router={router} />
                 </ScrollTop>
-            </DateProvider>
+            </DataProvider>
         </ThemeCustomization>
     );
 }

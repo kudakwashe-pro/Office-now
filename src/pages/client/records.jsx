@@ -8,6 +8,19 @@ import React from 'react';
 import { ItemsGrid } from 'pages/Items/ItemsGrid';
 import { AddItemDialog } from 'pages/Items/addItem';
 import MyTooltip from 'components/@extended/MyTooltip';
+import { useClientData } from 'contexts/clientContext';
+
+const columns = [
+    { field: 'supplier_name', headerName: 'Name of Supplier' },
+    { field: 'address', headerName: 'Address' },
+    { field: 'email', headerName: 'Email' },
+    { field: 'phone_number', headerName: 'Phone Number' },
+    { field: 'contact_person', headerName: 'Contact Person' },
+
+    { field: 'tin_number', headerName: 'TIN#' },
+    { field: 'vat_number', headerName: 'VAT#' }
+]
+
 
 // ==============================|| SAMPLE PAGE ||============================== //
 
@@ -15,6 +28,7 @@ export default function ClientRecord() {
     const [searchValue, setSearchValue] = React.useState('');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [openDialog, setOpenDialog] = React.useState(false);
+    const client = useClientData();
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -24,10 +38,10 @@ export default function ClientRecord() {
         setAnchorEl(null);
     };
 
-    const filteredData = clientRows
+    const filteredData = client.data
         .map((params) => ({ ...params }))
         .filter((item) =>
-            clientColumns.some(
+            columns.some(
                 (col) => item[col.field] != null && item[col.field].toString().toLowerCase().includes(searchValue.toString().toLowerCase())
             )
         );
@@ -171,7 +185,7 @@ export default function ClientRecord() {
                 </Stack>
             }
         >
-            <ItemsGrid columns={clientColumns} rows={filteredData} />
+            <ItemsGrid columns={columns} rows={filteredData} />
             <AddItemDialog openDialog={openDialog} setOpenDialog={setOpenDialog} />
         </MainCard>
     );

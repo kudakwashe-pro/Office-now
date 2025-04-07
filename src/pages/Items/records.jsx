@@ -1,20 +1,47 @@
 // project import
 import MainCard from 'components/MainCard';
-import { itemsColumns, popularItems } from 'contexts/auth-reducer/data';
 import { ItemsGrid } from './ItemsGrid';
 import { Avatar, ButtonBase, InputAdornment, OutlinedInput, Popover } from '@mui/material';
-import { AddCircle, PlaylistRemove, Refresh, Search } from '@mui/icons-material';
+import { AddCircle, CheckBox, CheckBoxOutlineBlank, Checklist, PlaylistRemove, Refresh, Search } from '@mui/icons-material';
 import MyTooltip from 'components/@extended/MyTooltip';
 import { Stack } from '@mui/system';
 import React from 'react';
 import { AddItemDialog } from './addItem';
+import { useItemData } from 'contexts/itemsContext';
+import { useToaster } from 'contexts/notifyContext';
+import { useDate } from 'contexts/dateContext';
+import { deleteApi, updateApi } from 'api/server';
+import { SelectOutlined } from '@ant-design/icons';
 
-// ==============================|| SAMPLE PAGE ||============================== //
+const columns = [
+    { field: 'item_id', headerName: 'item_id' },
+    { field: 'item_name', headerName: 'Item name' },
+    { field: 'description', headerName: 'Description' },
+    { field: 'price', headerName: 'Price' },
+    { field: 'quantity', headerName: 'Quantity' },
+    { field: 'category', headerName: 'category' },
+    { field: 'updated_at', headerName: 'updated_at', type: 'date' },
+    { field: 'created_at', headerName: 'created_at', type: 'date' }
+];
+// ==============================|| Item records PAGE ||============================== //
 
 export default function ItemsRecordsPage() {
     const [searchValue, setSearchValue] = React.useState('');
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [openDialog, setOpenDialog] = React.useState(false);
+    const [openEditDialog, setOpenEditDialog] = React.useState(false);
+    const [selectedEditItem, setSelectedEditItem] = React.useState({});
+    const [enableSelect, setEnableSelect] = React.useState(false);
+
+    const items = useItemData();
+    const toast = useToaster();
+    const myDate = useDate();
+
+    React.useEffect(() => {
+        if (items.toastState === true) {
+            items.processToast(toast);
+        }
+    }, [toast, items]);
 
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -23,14 +50,86 @@ export default function ItemsRecordsPage() {
     const handleClose = () => {
         setAnchorEl(null);
     };
+    const col = columns.map((row) => row.field);
 
-    const filteredData = popularItems
+    const filteredData = items.data
         .map((params) => ({ ...params }))
         .filter((item) =>
-            itemsColumns.some(
-                (col) => item[col.field] != null && item[col.field].toString().toLowerCase().includes(searchValue.toString().toLowerCase())
-            )
+            col.some((value) => item[value] && item[value].toString().toLowerCase().includes(searchValue.toString().toLowerCase()))
         );
+
+    const initialValues = {
+        item_name: '',
+        description: '',
+        price: 0,
+        quantity: 0,
+        category: '',
+        created_at: myDate.value
+    };
+
+    const HandleDelete = async (params) => {
+        const deleteWithID = async (id) => {
+            if (id) {
+                const response = await deleteApi({ url: `items/${id}/` });
+                if (response.status === 204) {
+                    toast.toastSuccess('Item deleted successfully');
+                    items.toggleRefreshQ;
+                } else {
+                    toast.toastError(`Error: ${response.status} ${response.statusText}`);
+                }
+                items.toggleRefreshQ();
+            }
+        };
+        params.map((id) => deleteWithID(id));
+    };
+
+    const handleUpdate = async (params, { setSubmitting, resetForm }) => {
+        const toggleFinish = () => {
+            resetForm({ values: initialValues, touched: {} });
+            setSelectedEditItem({});
+            setOpenEditDialog(false);
+        };
+        let newData = { ...params, updated_at: myDate.value };
+        const response = await updateApi({ url: `items/${params.item_id}/`, data: newData });
+        if (response.status === 200) {
+            toast.toastSuccess('Item updated successfully');
+            toggleFinish();
+            items.toggleRefreshQ();
+        } else {
+            toast.toastError(`Error: ${response.status} ${response.statusText}`);
+        }
+        setSubmitting(false);
+    };
+
+    const handleEdit = (row) => {
+        setOpenEditDialog(true);
+        setSelectedEditItem({
+            item_id: row.item_id,
+            item_name: row.item_name,
+            description: row.description,
+            price: row.price,
+            quantity: row.quantity,
+            category: row.category,
+            created_at: new Date(row.created_at).toISOString().split('T')[0]
+        });
+    };
+
+    const handleCreate = async (params, { setSubmitting, resetForm }) => {
+        const toggleFinish = () => {
+            resetForm({ values: initialValues, touched: {} });
+            setOpenDialog(false);
+        };
+        let newData = { ...params, updated_at: myDate.value };
+        const response = await createApi({ url: `items/`, data: newData });
+        if (response.status === 201) {
+            toast.toastSuccess('Item create successfully');
+            toggleFinish();
+            items.toggleRefreshQ();
+        } else {
+            toast.toastError(`Error: ${response.status} ${response.statusText}`);
+        }
+        setSubmitting(false);
+    };
 
     return (
         <MainCard
@@ -152,6 +251,21 @@ export default function ItemsRecordsPage() {
                             inputProps={{ 'aria-label': 'weight', sx: { bgcolor: 'transparent', pl: 0.5 } }}
                         />
                     </Popover>
+                    <MyTooltip title="Select items" props={{ placement: 'bottom', arrow: false }}>
+                        <ButtonBase
+                            sx={{
+                                borderRadius: '8px',
+                                py: 0.7,
+                                px: 0.5,
+                                borderColor: 'divider',
+                                borderRight: 'none',
+                                ':hover': { bgcolor: 'divider' }
+                            }}
+                            onClick={() => setEnableSelect((prev) => !prev)}
+                        >
+                            <Checklist style={{ stroke: '1.6ex', fontSize: 15 }} />
+                        </ButtonBase>
+                    </MyTooltip>
                     <MyTooltip title="Refresh" props={{ placement: 'bottom', arrow: false }}>
                         <ButtonBase
                             sx={{
@@ -163,7 +277,7 @@ export default function ItemsRecordsPage() {
                                 borderRight: 'none',
                                 ':hover': { bgcolor: 'divider' }
                             }}
-                            // onClick={payment.toggleRefresh}
+                            onClick={items.toggleRefresh}
                         >
                             <Refresh sx={{ stroke: '1.6ex', fontSize: 20 }} />
                         </ButtonBase>
@@ -171,8 +285,21 @@ export default function ItemsRecordsPage() {
                 </Stack>
             }
         >
-            <ItemsGrid columns={itemsColumns} rows={filteredData} />
-            <AddItemDialog openDialog={openDialog} setOpenDialog={setOpenDialog} />
+            <ItemsGrid
+                enableSelect={enableSelect}
+                columns={columns}
+                rows={filteredData}
+                onDeleteSelected={HandleDelete}
+                searchTerm={searchValue}
+                onEdit={handleEdit}
+            />
+            <AddItemDialog initialItems={initialValues} openDialog={openDialog} setOpenDialog={setOpenDialog} handleSubmit={handleCreate} />
+            <AddItemDialog
+                openDialog={openEditDialog}
+                setOpenDialog={setOpenEditDialog}
+                handleSubmit={handleUpdate}
+                initialItems={selectedEditItem}
+            />
         </MainCard>
     );
 }

@@ -181,14 +181,6 @@ export const clientColumns = [
     { field: 'tin_number', headerName: 'TIN#' },
     { field: 'vat_number', headerName: 'VAT#' }
 ];
-
-// Name of duplier
-// Addres
-// contact details
-// Contact person
-// TIN#
-// VAT#
-
 export const clientRows = [
     {
         supplier_name: 'Alice Johnson',

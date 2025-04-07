@@ -10,9 +10,9 @@ export default function ItemsPage() {
         <Grid container rowSpacing={4.5} columnSpacing={2.75}>
             {/* row 1 */}
             {/* row 2 */}
-            <Grid item xs={12} sx={{ mb: -2.25 }}>
+            {/* <Grid item xs={12} sx={{ mb: -2.25 }}>
                 <Typography variant="h5">Record For Items</Typography>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} md={7} lg={12}>
                 <ItemsRecordsPage />
             </Grid>

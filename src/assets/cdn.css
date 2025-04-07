@@ -1,0 +1,29 @@
+.input-C {
+    position: absolute;
+    top: 50%;
+    right: 48px;
+    transform: translateY(-50%);
+  }
+  .input-A {
+  position: absolute;
+  top: 50%;
+  right: 29px;
+  transform: translateY(-50%);
+  }
+  .input-C2 {
+  position: absolute;
+  top: 50%;
+  right: 80px;
+  transform: translateY(-50%);
+  }
+  .input-A2 {
+  position: absolute;
+  top: 50%;
+  right: 55px;
+  transform: translateY(-50%);
+  }
+  .toast-cs{
+  min-height: 10px;
+  height: 80px;
+  background: $secondaryDark;
+  }

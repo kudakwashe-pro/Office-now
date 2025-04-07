@@ -12,43 +12,41 @@ import {
     FormLabel,
     Grid,
     Input,
-    InputAdornment,
     InputLabel,
     ListItem,
-    MenuItem,
     OutlinedInput,
-    Select,
     useTheme
 } from '@mui/material';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
-import { AttachFileOutlined, CheckCircle, DisabledByDefault, EmailRounded, FemaleRounded, MaleRounded, Phone } from '@mui/icons-material';
-import PerfectScrollbar from 'react-perfect-scrollbar';
+import { AttachFileOutlined } from '@mui/icons-material';
 import { useDate } from 'contexts/dateContext';
 import { grey } from '@mui/material/colors';
+import AnimateButton from 'components/@extended/AnimateButton';
 
-export const AddItemDialog = ({ openDialog, setOpenDialog }) => {
-    const myDate = useDate();
-    const theme = useTheme();
-
-    const initialValues = {
-        item_id: '',
+export const AddItemDialog = ({
+    openDialog,
+    setOpenDialog,
+    handleSubmit,
+    initialItems = {
         item_name: '',
         description: '',
         price: 0,
         quantity: 0,
         category: '',
-        created_at: myDate.value,
-        updated_at: ''
-    };
+        created_at: null
+    }
+}) => {
+    const myDate = useDate();
+    const theme = useTheme();
 
-    const handleSubmit = async (params, { setSubmitting, resetForm }) => {
-        // const response = await createApi({
-        //     url:
-        // });
-        setSubmitting(false);
-        resetForm({ values: initialValues, touched: {} });
-        setOpenDialog(false);
+    const initialValues = {
+        item_name: '',
+        description: '',
+        price: 0,
+        quantity: 0,
+        category: '',
+        created_at: myDate.value
     };
 
     return (
@@ -59,21 +57,10 @@ export const AddItemDialog = ({ openDialog, setOpenDialog }) => {
             <DialogContent>
                 <Box sx={{ pt: 2 }}>
                     <Formik
-                        initialValues={{
-                            created_at: myDate.value,
-                            updated_at: '',
-                            item_id: '',
-                            item_name: '',
-                            description: '',
-                            price: 0,
-                            quantity: 0,
-                            category: ''
-                        }}
+                        initialValues={initialItems}
                         onSubmit={handleSubmit}
                         validationSchema={Yup.object().shape({
                             created_at: Yup.date().required('Date is required'),
-                            updated_at: Yup.date().required('Date is required'),
-                            item_id: Yup.string().required('Item name is required'),
                             item_name: Yup.string().required('Item name is required'),
                             description: Yup.string().required('Description is required'),
                             price: Yup.number().required('Price is required'),
@@ -128,6 +115,29 @@ export const AddItemDialog = ({ openDialog, setOpenDialog }) => {
                                                     {touched.item_name && errors.item_name && (
                                                         <FormHelperText error id="standard-weight-helper-text-item_name">
                                                             {errors.item_name}
+                                                        </FormHelperText>
+                                                    )}
+                                                </FormControl>
+                                            </Grid>
+                                            <Grid item>
+                                                <FormControl
+                                                    fullWidth
+                                                    error={Boolean(touched.category && errors.category)}
+                                                    sx={{ ...theme.typography.customInput }}
+                                                >
+                                                    <InputLabel sx={{ position: 'absolute' }} htmlFor="outlined-category">
+                                                        Category
+                                                    </InputLabel>
+                                                    <OutlinedInput
+                                                        id="outlined-category"
+                                                        value={values.category}
+                                                        name="category"
+                                                        onBlur={handleBlur}
+                                                        onChange={handleChange}
+                                                    />
+                                                    {touched.category && errors.category && (
+                                                        <FormHelperText error id="standard-weight-helper-text-category">
+                                                            {errors.category}
                                                         </FormHelperText>
                                                     )}
                                                 </FormControl>
@@ -251,20 +261,22 @@ export const AddItemDialog = ({ openDialog, setOpenDialog }) => {
                             </InputLabel>
                         </Grid>
                         <Grid item>
-                            <InputLabel
-                                sx={{
-                                    borderRadius: '6px',
-                                    px: 2,
-                                    py: 1,
-                                    fontWeight: 'bold',
-                                    bgcolor: grey[500],
-                                    color: 'white',
-                                    ':hover': { background: grey[900] }
-                                }}
-                                htmlFor="submit-btn"
-                            >
-                                {'Save'}
-                            </InputLabel>
+                            <AnimateButton>
+                                <InputLabel
+                                    sx={{
+                                        borderRadius: '6px',
+                                        px: 2,
+                                        py: 1,
+                                        fontWeight: 'bold',
+                                        bgcolor: grey[500],
+                                        color: 'white',
+                                        ':hover': { background: grey[900] }
+                                    }}
+                                    htmlFor="submit-btn"
+                                >
+                                    {'Save'}
+                                </InputLabel>
+                            </AnimateButton>
                         </Grid>
                     </Grid>
                 </Box>
@@ -275,7 +287,9 @@ export const AddItemDialog = ({ openDialog, setOpenDialog }) => {
 
 AddItemDialog.propTypes = {
     openDialog: PropTypes.bool,
-    setOpenDialog: PropTypes.func
+    setOpenDialog: PropTypes.func,
+    handleSubmit: PropTypes.func,
+    initialItems: PropTypes.object
 };
 
 export const AddItemBulkDialog = ({ openDialog, setOpenDialog }) => {
