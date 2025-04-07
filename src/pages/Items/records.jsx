@@ -285,7 +285,7 @@ export default function ItemsRecordsPage() {
                 </Stack>
             }
         >
-            <ItemsGrid
+            <ItemsGrid 
                 enableSelect={enableSelect}
                 columns={columns}
                 rows={filteredData}
